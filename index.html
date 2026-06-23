@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para mi niña chiquita 💕</title>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght=600&family=Plus+Jakarta+Sans:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
+            --primary: #f43f5e;
+            --primary-soft: #ffe4e6;
+            --text-dark: #4c1d24;
+            --glass: rgba(255, 255, 255, 0.85);
+            --border-glass: rgba(244, 63, 94, 0.2);
+        }
+
+        body {
+            margin: 0;
+            padding: 15px;
+            background: var(--bg-gradient);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+
+        /* Reproductor Premium Estilo Tarjeta */
+        .reproductor-premium {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 360px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.08);
+            box-sizing: border-box;
+        }
+
+        .reproductor-premium a {
+            background: var(--primary);
+            color: #fff;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(244, 63, 94, 0.2);
+        }
+
+        /* Contenedor Principal de la App */
+        .wrapper-juego {
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Contenedor del Canvas de Juego */
+        #zona-juego {
+            width: 100%;
+            height: 360px;
+            background: #ffffff;
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 12px 30px rgba(76, 29, 36, 0.06);
+            box-sizing: border-box;
+        }
+
+        /* Marcador y Barra de Progreso Visual */
+        .header-marcador {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 5;
+        }
+
+        .marcador-texto {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .barra-progreso-bg {
+            width: 100%;
+            height: 6px;
+            background: #f1f5f9;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .barra-progreso-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+
+        /* Elemento Jugador */
+        #gatito {
+            font-size: 3.2rem;
+            position: absolute;
+            bottom: 15px;
+            left: 150px;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            transition: left 0.12s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+
+        /* Objetos en movimiento */
+        .item-caida {
+            position: absolute;
+            font-size: 1.6rem;
+            user-select: none;
+            will-change: transform;
+        }
+
+        /* Botonera de Control Profesional para Pantallas Táctiles */
+        .controles-movil {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .btn-control {
+            background: var(--glass);
+            border: 1px solid var(--border-glass);
+            color: var(--primary);
+            border-radius: 16px;
+            padding: 14px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-control:active {
+            background: var(--primary-soft);
+            transform: scale(0.96);
+        }
+
+        /* Interfaz de Victoria (Carta Oculta Premium) */
+        #pantalla-victoria {
+            display: none;
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 30px 25px;
+            box-sizing: border-box;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(76, 29, 36, 0.08);
+            animation: smoothPop 0.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+        }
+
+        .texto-carta {
+            font-family: 'Caveat', cursive;
+            font-size: 1.75rem;
+            line-height: 1.4;
+            color: #4a3739;
+            text-align: left;
+            margin-top: 20px;
+            margin-bottom: 25px;
+        }
+
+        .destacado {
+            color: var(--primary);
+            font-weight: bold;
+            border-bottom: 2px dotted var(--primary);
+        }
+
+        /* Botón Recomenzar */
+        .btn-reinicio {
+            background: #f1f5f9;
+            border: none;
+            color: #64748b;
+            padding: 12px 24px;
+            border-radius: 16px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-reinicio:hover {
+            background: var(--primary-soft);
+            color: var(--primary);
+        }
+
+        @keyframes smoothPop {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Reproductor Minimalista -->
+    <div class="reproductor-premium">
+        <span style="font-weight: 500; font-size: 0.8rem;">🎵 Cariño Mío - Pablorico & Triste Domingo</span>
+        <a href="https://open.spotify.com/intl-es/track/4X1UnoOv7dRcMy1ZP0LB6r?si=94c841bdb80c4503" target="_blank">Escuchar</a>
+    </div>
+
+    <div class="wrapper-juego">
+        <!-- ÁREA DEL CANVAS -->
+        <div id="zona-juego">
+            <div class="header-marcador">
+                <div class="marcador-texto">Progreso: <span id="puntos">0</span> / 15</div>
+                <div class="barra-progreso-bg">
+                    <div id="progreso-fill" class="barra-progreso-fill"></div>
+                </div>
+            </div>
+            <div id="gatito">🐱</div>
+        </div>
+
+        <!-- CONTROLES TÁCTILES LIMPIOS -->
+        <div class="controles-movil" id="ui-controles">
+            <button class="btn-control" onclick="moverGato('izq')">◀</button>
+            <button class="btn-control" onclick="moverGato('der')">▶</button>
+        </div>
+
+        <!-- CARTA OCULTA -->
+        <div id="pantalla-victoria">
+            <div style="font-size: 3.2rem; margin-bottom: 10px;">😻✨</div>
+            <h2 style="margin: 0; font-size: 1.3rem; letter-spacing: 0.5px; text-transform: uppercase; color: var(--primary);">¡Completado, cariño mío!</h2>
+            <div class="texto-carta">
+                ¡Hola, <span class="destacado">mi niña chiquita</span>! 🌸<br><br>
+                Quería recordarte de una forma diferente y especial lo muchísimo que me encantas. A tu lado todo es más bonito, tranquilo y lleno de paz, justo como este refugio de gatitos. <br><br>
+                Te juro que cada pequeño detalle que compartimos se queda guardado en mi corazón. Gracias por estos <span class="destacado">2 meses juntos</span> llenos de magia. Eres y siempre serás mi cariño mío por completo. ¡Te amo! 🐾💕
+            </div>
+            <!-- BOTÓN PARA REINICIAR LA FUNCIÓN -->
+            <button class="btn-reinicio" onclick="reiniciarJuego()">✨ Jugar otra vez</button>
+        </div>
+    </div>
+
+    <script>
+        const zona = document.getElementById('zona-juego');
+        const gatito = document.getElementById('gatito');
+        const txtPuntos = document.getElementById('puntos');
+        const progresoFill = document.getElementById('progreso-fill');
+        const pantallaVictoria = document.getElementById('pantalla-victoria');
+        const uiControles = document.getElementById('ui-controles');
+
+        let puntos = 0;
+        let juegoActivo = true;
+        let gatoX = 150; 
+        const anchoZona = 360;
+        const anchoGato = 60;
+        let bucleJuego;
+
+        function moverGato(direccion) {
+            if (!juegoActivo) return;
+            if (direccion === 'izq') {
+                gatoX = Math.max(0, gatoX - 40);
+            } else if (direccion === 'der') {
+                gatoX = Math.min(anchoZona - anchoGato, gatoX + 40);
+            }
+            gatito.style.left = gatoX + 'px';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') moverGato('izq');
+            if (e.key === 'ArrowRight') moverGato('der');
+        });
+
+        function crearItem() {
+            if (!juegoActivo) return;
+
+            const item = document.createElement('div');
+            item.classList.add('item-caida');
+            // Añadido el pescado 🐟 a las opciones de caída
+            item.innerText = ['💖', '🐟', '🎵', '🌸', '✨'][Math.floor(Math.random() * 5)];
+            item.style.left = Math.random() * (anchoZona - 30) + 'px';
+            item.style.top = '0px';
+            zona.appendChild(item);
+
+            let posY = 0;
+            const caida = setInterval(() => {
+                if (!juegoActivo) {
+                    clearInterval(caida);
+                    item.remove();
+                    return;
+                }
+
+                posY += 4; 
+                item.style.top = posY + 'px';
+
+                if (posY >= 290 && posY <= 330) {
+                    const itemX = parseInt(item.style.left);
+                    if (itemX + 20 >= gatoX && itemX <= gatoX + anchoGato) {
+                        puntos++;
+                        txtPuntos.innerText = puntos;
+                        
+                        // Modificado el progreso para que calcule en base a 15
+                        const porcentaje = (puntos / 15) * 100;
+                        progresoFill.style.width = porcentaje + '%';
+
+                        clearInterval(caida);
+                        item.remove();
+
+                        if (puntos >= 15) {
+                            finalizarJuego();
+                        }
+                    }
+                }
+
+                if (posY > 360) {
+                    clearInterval(caida);
+                    item.remove();
+                }
+            }, 16); 
+        }
+
+        // Arrancar el motor del juego
+        function iniciarMotor() {
+            bucleJuego = setInterval(crearItem, 850); // Un pelín más ágil
+        }
+
+        function finalizarJuego() {
+            juegoActivo = false;
+            clearInterval(bucleJuego);
+            zona.style.display = 'none';
+            uiControles.style.display = 'none';
+            pantallaVictoria.style.display = 'block';
+        }
+
+        // Lógica limpia de reinicio de la App
+        function reiniciarJuego() {
+            puntos = 0;
+            gatoX = 150;
+            txtPuntos.innerText = puntos;
+            progresoFill.style.width = '0%';
+            gatito.style.left = gatoX + 'px';
+            
+            pantallaVictoria.style.display = 'none';
+            zona.style.display = 'block';
+            uiControles.style.display = 'grid';
+            
+            juegoActivo = true;
+            iniciarMotor();
+        }
+
+        // Encendido inicial
+        iniciarMotor();
+    </script>
+</body>
+</html>
